@@ -1,0 +1,187 @@
+﻿@model List<S1L04.Models.PersonModel>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List of People</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .table-bordered td, .table-bordered th {
+            border: 1px solid #dee2e6 !important;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f8f9fa;
+        }
+
+        .btn-delete {
+            background-color: green;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+            .btn-delete:hover {
+                background-color: darkgreen;
+            }
+
+        .search-bar {
+            margin-bottom: 15px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>List of People</h1>
+
+        <!-- Create New Link -->
+        <a href="/People/Create" class="btn btn-primary mb-3">Create New</a>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <form>
+                <label for="searchInput" class="mr-2">Search string:</label>
+                <input type="text" id="searchInput" class="form-control" placeholder="Enter search term" />
+                <button type="button" id="searchButton" class="btn btn-secondary">Submit</button>
+            </form>
+        </div>
+
+        <!-- Table to display people -->
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Student number</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email address</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td>@Model[i].StuNumber</td>
+                        <td>@Model[i].FirstName</td>
+                        <td>@Model[i].LastName</td>
+                        <td>@Model[i].Email</td>
+                        <td>
+                            <form method="post" action="/People/DeletePerson">
+                                <input type="hidden" name="index" value="@i" />
+                                <button type="submit" class="btn-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Buttons for Local Storage -->
+        <div class="mt-3">
+            <button id="saveLocalStorage" class="btn btn-info mr-2">Save to local storage</button>
+            <button id="retrieveLocalStorage" class="btn btn-info mr-2">Retrieve from local storage</button>
+            <button id="clearLocalStorage" class="btn btn-info">Clear local storage</button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            © 2025 - INF272 Samples
+        </div>
+    </div>
+
+    <!-- JavaScript for Search Functionality and Local Storage -->
+    <script>
+        // Search Functionality
+        document.getElementById('searchButton').addEventListener('click', function () {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const firstName = row.cells[1].textContent.toLowerCase();
+                if (firstName.includes(searchValue)) {
+                    row.style.color = 'red';
+                    setTimeout(() => row.style.color = '', 3000); // Reset color after 3 seconds
+                } else {
+                    row.style.color = '';
+                }
+            });
+        });
+
+        // Save to Local Storage (Without JSON)
+        document.getElementById('saveLocalStorage').addEventListener('click', function () {
+            const rows = document.querySelectorAll('tbody tr');
+            let dataString = '';
+
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                const rowData = [
+                    cells[0].textContent, // StuNumber
+                    cells[1].textContent, // FirstName
+                    cells[2].textContent, // LastName
+                    cells[3].textContent, // Email
+                    index // Index for deletion
+                ].join('|'); // Use '|' as a delimiter
+
+                dataString += rowData + '\n'; // Separate rows with newline
+            });
+
+            localStorage.setItem('peopleTable', dataString);
+        });
+
+        // Retrieve from Local Storage (Without JSON)
+        document.getElementById('retrieveLocalStorage').addEventListener('click', function () {
+            const savedData = localStorage.getItem('peopleTable');
+            if (savedData) {
+                document.querySelector('tbody').innerHTML = ''; // Clear current rows
+
+                const rows = savedData.split('\n'); // Split by newline
+                rows.forEach(rowData => {
+                    if (!rowData.trim()) return; // Skip empty lines
+
+                    const [stuNumber, firstName, lastName, email, index] = rowData.split('|'); // Split by '|'
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                            <td>${stuNumber}</td>
+                            <td>${firstName}</td>
+                            <td>${lastName}</td>
+                            <td>${email}</td>
+                            <td>
+                                <form method="post" action="/People/DeletePerson">
+                                    <input type="hidden" name="index" value="${index}" />
+                                    <button type="submit" class="btn-delete">Delete</button>
+                                </form>
+                            </td>
+                        `;
+                    document.querySelector('tbody').appendChild(row);
+                });
+            }
+        });
+
+        // Clear Local Storage
+        document.getElementById('clearLocalStorage').addEventListener('click', function () {
+            localStorage.removeItem('peopleTable');
+        });
+    </script>
+
+</body>
+</html>

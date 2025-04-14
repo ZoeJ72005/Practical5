@@ -1,0 +1,25 @@
+﻿@model S1L04.Models.PersonModel
+
+<h2>Create New Person</h2>
+
+<form method="post" action="/People/AddPerson">
+    <div>
+        <label for="StuNumber">Student Number:</label>
+        <input type="text" name="StuNumber" id="StuNumber" required />
+    </div>
+    <div>
+        <label for="FirstName">First Name:</label>
+        <input type="text" name="FirstName" id="FirstName" required />
+    </div>
+    <div>
+        <label for="LastName">Last Name:</label>
+        <input type="text" name="LastName" id="LastName" required />
+    </div>
+    <div>
+        <label for="Email">Email Address:</label>
+        <input type="email" name="Email" id="Email" required />
+    </div>
+    <button type="submit">Create</button>
+</form>
+
+<a href="/People/ListPeople">Back to List</a>
